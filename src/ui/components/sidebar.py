@@ -3,40 +3,37 @@ import customtkinter as ctk
 class Sidebar(ctk.CTkFrame):
     def __init__(self, master, callback, **kwargs):
         super().__init__(master, fg_color="#2b2b2b", **kwargs)
-
         self.callback = callback
-        self.current_step = 0
         self.steps = [
             "Data Preparation",
             "Model Training",
             "Model Evaluation",
             "Model Application",
         ]
-        self.buttons = []
+        self.labels = []
+        self.current_index = 0
         self.create_sidebar()
 
     def create_sidebar(self):
         title_label = ctk.CTkLabel(self, text="fastText Project", font=("Arial", 16, "bold"), text_color="white")
-        title_label.pack(pady=(10,20))
-        for index, step in enumerate(self.steps):
-            btn = ctk.CTkButton(self, text=step, command=lambda idx = index: self.on_button_click(idx))
-            btn.pack(fill='both', pady=10, padx=10)
-            self.buttons.append(btn)
-            if index != 0:
-                btn.configure(state="disabled")
-    
-    def on_button_click(self, index):
-        if index == self.current_step:
-            self.callback(index)
+        title_label.pack(pady=(10, 20))
 
-    def enable_next_step(self):
-        self.current_step += 1
-        if self.current_step < len(self.buttons):
-            self.buttons[self.current_step].configure(state="normal")
+        for step in self.steps:
+            lbl = ctk.CTkLabel(self, text=step, font=("Arial", 12, "bold"), text_color="#555555", fg_color="#2b2b2b", corner_radius=10)
+            lbl.pack(fill='both', pady=5, padx=15)
+            self.labels.append(lbl)
 
-    def reset(self): 
-        self.current_step = 0
-        for btn in self.buttons:
-            btn.configure(state="disabled")
-            if self.buttons: 
-                self.buttons[0].configure(state="norma")
+        settings_btn = ctk.CTkButton(self, text="Settings", fg_color="#8a8281", command=self.open_settings)
+        settings_btn.pack(side="bottom", fill="both", pady=20, padx=10)
+
+    def highlight_step(self, index):
+        for i, lbl in enumerate(self.labels):
+            if i < index:
+                lbl.configure(text_color="#4CAF50", fg_color="#333333") 
+            elif i == index:
+                lbl.configure(text_color="white", fg_color="#4CAF50") 
+            else:
+                lbl.configure(text_color="#555555", fg_color="#2b2b2b") 
+
+    def open_settings(self):
+        print("settings")
