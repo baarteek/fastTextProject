@@ -6,7 +6,7 @@ def main():
     ctk.set_default_color_theme("green")
 
     app = ctk.CTk()
-    app.geometry("800x600")
+    app.geometry("1000x600")
     app.title("fastText Project")
 
     main_window = MainWindow(master=app)

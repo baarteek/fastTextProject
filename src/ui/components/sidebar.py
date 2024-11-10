@@ -1,15 +1,10 @@
 import customtkinter as ctk
 
 class Sidebar(ctk.CTkFrame):
-    def __init__(self, master, callback, **kwargs):
+    def __init__(self, master, callback, steps, **kwargs):
         super().__init__(master, fg_color="#2b2b2b", **kwargs)
         self.callback = callback
-        self.steps = [
-            "Data Preparation",
-            "Model Training",
-            "Model Evaluation",
-            "Model Application",
-        ]
+        self.steps = steps
         self.labels = []
         self.current_index = 0
         self.create_sidebar()

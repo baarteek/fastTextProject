@@ -1,8 +1,7 @@
 import customtkinter as ctk
 from .components.sidebar import Sidebar
-from.components.navigation_bar import NavigationBar
-from .views.data_preparation import DataPreparation
-from .views.model_training import ModelTraining
+from .components.navigation_bar import NavigationBar
+from .views import *
 
 class MainWindow(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -10,12 +9,18 @@ class MainWindow(ctk.CTkFrame):
         self.pack(fill="both", expand=True)
 
         self.steps = [
-            ("Data Preparation", DataPreparation),
-            ("Model Training", ModelTraining)
+            ("Data Loading", DataLoadingView),
+            ("Data Exploration", DataExplorationView),
+            ("Data Cleaning", DataCleaningView),
+            ("Text Processing", TextProcessingView),
+            ("Label Preparation", LabelPreparationView),
+            ("Data Splitting", DataSplittingView),
+            ("FastText Formatting", FastTextFormattingView),
+            ("Data Validation", DataValidationView)
         ]
         self.current_index = 0
 
-        self.sidebar = Sidebar(self, self.switch_frame)
+        self.sidebar = Sidebar(self, self.switch_frame, steps=[step[0] for step in self.steps])
         self.sidebar.place(relx=0, rely=0, relwidth=0.2, relheight=1.0)
         self.container = ctk.CTkFrame(self)
         self.container.place(relx=0.2, rely=0, relwidth=0.8, relheight=1.0)
