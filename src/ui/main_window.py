@@ -49,12 +49,8 @@ class MainWindow(ctk.CTkFrame):
         view_class = self.steps[index][1]
 
         if index not in self.view_instances:
-            if view_class == DataLoadingView:
-                self.view_instances[index] = view_class(self.container, data_manager=self.data_manager, navigation_bar=self.navigation_bar)
-                self.navigation_bar.set_next_enabled(False)
-            else:
-                self.view_instances[index] = view_class(self.container)
-                self.navigation_bar.set_next_enabled(True)
+            self.view_instances[index] = view_class(self.container, data_manager=self.data_manager, navigation_bar=self.navigation_bar)
+            self.navigation_bar.set_next_enabled(False)
 
         self.current_frame = self.view_instances[index]
         self.current_frame.place(relx=0, rely=0.1, relwidth=1.0, relheight=0.9)
