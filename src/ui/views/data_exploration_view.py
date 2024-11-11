@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import matplotlib.pyplot as plt
 from ..components.universal_table import UniversalTable
+from ..components.progress_dialog import ProgressDialog
 
 class DataExplorationView(ctk.CTkScrollableFrame):
     def __init__(self, master, data_manager=None, navigation_bar=None, **kwargs):
@@ -49,13 +50,15 @@ class DataExplorationView(ctk.CTkScrollableFrame):
         self.text_stats_table = UniversalTable(self, data_list=[], empty_message="No text statistics available")
         self.text_stats_table.pack(pady=5, fill="both", expand=True)
 
-        self.show_plot_button = ctk.CTkButton(self, text="Show Text Length Distribution", command=self.show_text_length_distribution)
+        self.show_plot_button = ctk.CTkButton(self, text="Show Text Length Distribution", fg_color="#31459e", hover_color="#202b5c", command=self.show_text_length_distribution)
         self.show_plot_button.pack(pady=10, fill="x")
 
         self.display_basic_info()
         self.display_missing_values()
         self.populate_column_options()
         self.populate_columns_table()
+
+
 
     def populate_column_options(self):
         columns = [col for col in self.data_manager.get_data().columns if self.data_manager.get_data()[col].dtype == 'string']
@@ -94,15 +97,21 @@ class DataExplorationView(ctk.CTkScrollableFrame):
             self.remove_missing_button.configure(state="disabled")
 
     def fill_missing_from_above(self):
+        progress_dialog = ProgressDialog(self, title="Filling Missing Values", message="Filling missing values from above...")
         self.data_manager.fill_missing_from_above()
+        progress_dialog.stop_progress()
         self.display_missing_values()
 
     def fill_missing_from_below(self):
+        progress_dialog = ProgressDialog(self, title="Filling Missing Values", message="Filling missing values from below...")
         self.data_manager.fill_missing_from_below()
+        progress_dialog.stop_progress()
         self.display_missing_values()
 
     def remove_missing_values(self):
+        progress_dialog = ProgressDialog(self, title="Removing Missing Values", message="Removing missing values...")
         self.data_manager.drop_missing_values()
+        progress_dialog.stop_progress()
         self.display_missing_values()
 
     def display_text_stats(self):

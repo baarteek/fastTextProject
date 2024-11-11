@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from tkinter import filedialog, ttk
 from modules.data_manager import DataManager
+from ..components.progress_dialog import ProgressDialog
 
 class DataLoadingView(ctk.CTkFrame):
     def __init__(self, master, data_manager=None, navigation_bar=None, on_data_loaded=None, **kwargs):
@@ -37,21 +38,28 @@ class DataLoadingView(ctk.CTkFrame):
             filetypes=[("CSV and JSON Files", "*.csv *.json"), ("CSV Files", "*.csv"), ("JSON Files", "*.json"), ("All Files", "*.*")]
         )
         if file_path:
-            success = self.data_manager.load_data(file_path)
-            if success:
-                self.status_label.configure(text=f"Loaded: {file_path}", text_color="green")
-                self.display_data_in_table()
-                if self.navigation_bar:
-                    self.navigation_bar.set_next_enabled(True) 
-                if self.on_data_loaded:
-                    self.on_data_loaded(file_path)
-            else:
-                self.status_label.configure(text="Failed to load data", text_color="red")
-                if self.navigation_bar:
-                    self.navigation_bar.set_next_enabled(False)
+            self.show_progress_dialog(file_path)
+
+    def show_progress_dialog(self, file_path):
+        progress_dialog = ProgressDialog(self, title="Loading Data", message="Loading data, please wait...")
+        self.after(100, lambda: self.run_data_loading(progress_dialog, file_path))
+        
+    def run_data_loading(self, progress_dialog, file_path):
+        success = self.data_manager.load_data(file_path)
+        progress_dialog.stop_progress()
+        
+        if success:
+            self.status_label.configure(text=f"Loaded: {file_path}", text_color="green")
+            self.display_data_in_table()
+            if self.navigation_bar:
+                self.navigation_bar.set_next_enabled(True) 
+            if self.on_data_loaded:
+                self.on_data_loaded(file_path)
         else:
-            self.status_label.configure(text="No file selected", text_color="red")
-    
+            self.status_label.configure(text="Failed to load data", text_color="red")
+            if self.navigation_bar:
+                self.navigation_bar.set_next_enabled(False)
+
     def display_data_in_table(self, limit=50):
         data = self.data_manager.get_data()
         if data is not None:
