@@ -14,6 +14,7 @@ class DataManager:
                 print("Unsupported file format. Only CSV and JSON files are supported.")
                 return False
             self.data = self.data.convert_dtypes()
+            self.data.replace("", None, inplace=True)
             print("Data loaded successfully.")
             return True
         except ValueError as ve:
@@ -43,6 +44,11 @@ class DataManager:
         if self.data is not None:
             return self.data.isnull().sum().to_dict()
         return {}
+    
+    def get_missing_values_count(self):
+        if self.data is not None:
+            return self.data.isnull().any(axis=1).sum()
+        return 0
 
     def fill_missing_from_above(self):
         if self.data is not None:
@@ -67,6 +73,10 @@ class DataManager:
             return self.data[self.data.duplicated(keep=False)]
         return pd.DataFrame()
 
+    def get_duplicates_count(self):
+        if self.data is not None:
+            return self.data.duplicated().sum()
+        return 0
     
     def remove_duplicates(self):
         if self.data is not None:
