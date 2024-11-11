@@ -62,6 +62,16 @@ class DataManager:
         if self.data is not None:
             self.data.dropna(inplace=True)
 
+    def get_duplicates(self):
+        if self.data is not None:
+            return self.data[self.data.duplicated(keep=False)]
+        return pd.DataFrame()
+
+    
+    def remove_duplicates(self):
+        if self.data is not None:
+            self.data.drop_duplicates(inplace=True)
+
     def get_text_column_stats(self, column):
         if self.data is not None and column in self.data.columns and self.data[column].dtype == 'string':
             text_lengths = self.data[column].str.len()

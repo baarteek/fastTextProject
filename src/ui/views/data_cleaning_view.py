@@ -55,7 +55,17 @@ class DataCleaningView(ctk.CTkScrollableFrame):
         self.remove_missing_button = ctk.CTkButton(self.fill_buttons_frame, text="Remove Missing Values", command=self.remove_missing_values, fg_color="#c24c4c", state="disabled")
         self.remove_missing_button.pack(side="right", padx=5, fill="x", expand=True)
 
+        self.duplicates_label = ctk.CTkLabel(self, text="Duplicate Records", font=("Arial", 16, "bold"))
+        self.duplicates_label.pack(pady=(20, 5))
+
+        self.duplicates_table = UniversalTable(self, data_list=[], empty_message="No duplicate records found")
+        self.duplicates_table.pack(pady=5, fill="both", expand=True)
+
+        self.remove_duplicates_button = ctk.CTkButton(self, text="Remove Duplicates", command=self.remove_duplicates, fg_color="#c24c4c")
+        self.remove_duplicates_button.pack(pady=10, fill="x", expand=True)
+
         self.display_missing_details()
+        self.display_duplicates()
         self.populate_column_options()
 
     def populate_column_options(self):
@@ -78,6 +88,16 @@ class DataCleaningView(ctk.CTkScrollableFrame):
             self.fill_above_button.configure(state="disabled")
             self.fill_below_button.configure(state="disabled")
             self.remove_missing_button.configure(state="disabled")
+
+    def display_duplicates(self):
+        duplicates = self.data_manager.get_duplicates()
+        if not duplicates.empty:
+            duplicates_data = duplicates.to_dict("records")  
+            self.duplicates_table.display_data(duplicates_data)
+            self.remove_duplicates_button.configure(state="normal")
+        else:
+            self.duplicates_table.display_data([{"Message": "No duplicate records found"}])
+            self.remove_duplicates_button.configure(state="disabled")
 
     def fill_missing_from_above(self):
         progress_dialog = ProgressDialog(self, title="Filling Missing Values", message="Filling missing values from above...")
@@ -108,3 +128,9 @@ class DataCleaningView(ctk.CTkScrollableFrame):
             self.value_var.set("")
         except ValueError:
             print("Invalid index value. Please enter a numeric index.")
+
+    def remove_duplicates(self):
+        progress_dialog = ProgressDialog(self, title="Removing Duplicates", message="Removing duplicate records...")
+        self.data_manager.remove_duplicates()
+        progress_dialog.stop_progress()
+        self.display_duplicates()
