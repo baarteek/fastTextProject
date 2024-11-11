@@ -36,6 +36,9 @@ class DataExplorationView(ctk.CTkScrollableFrame):
         self.fill_below_button = ctk.CTkButton(self.fill_buttons_frame, text="Fill from Below", command=self.fill_missing_from_below, state="disabled")
         self.fill_below_button.pack(side="left", padx=5, fill="x", expand=True)
 
+        self.remove_missing_button = ctk.CTkButton(self.fill_buttons_frame, text="Remove Missing Values", command=self.remove_missing_values, fg_color="#c24c4c", state="disabled")
+        self.remove_missing_button.pack(side="right", padx=5, fill="x", expand=True)
+
         self.text_stats_label = ctk.CTkLabel(self, text="Text Length Statistics", font=("Arial", 16, "bold"))
         self.text_stats_label.pack(pady=(20, 5))
 
@@ -83,10 +86,12 @@ class DataExplorationView(ctk.CTkScrollableFrame):
             self.missing_table.display_data(missing_data)
             self.fill_above_button.configure(state="normal")
             self.fill_below_button.configure(state="normal")
+            self.remove_missing_button.configure(state="normal")
         else:
             self.missing_table.display_data([{"Column": "No missing values", "Missing Values": ""}])
             self.fill_above_button.configure(state="disabled")
             self.fill_below_button.configure(state="disabled")
+            self.remove_missing_button.configure(state="disabled")
 
     def fill_missing_from_above(self):
         self.data_manager.fill_missing_from_above()
@@ -94,6 +99,10 @@ class DataExplorationView(ctk.CTkScrollableFrame):
 
     def fill_missing_from_below(self):
         self.data_manager.fill_missing_from_below()
+        self.display_missing_values()
+
+    def remove_missing_values(self):
+        self.data_manager.drop_missing_values()
         self.display_missing_values()
 
     def display_text_stats(self):

@@ -52,6 +52,9 @@ class DataManager:
         if self.data is not None:
             self.data.bfill(inplace=True)
 
+    def drop_missing_values(self):
+        if self.data is not None:
+            self.data.dropna(inplace=True)
 
     def get_text_column_stats(self, column):
         if self.data is not None and column in self.data.columns and self.data[column].dtype == 'string':
