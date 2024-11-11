@@ -52,6 +52,12 @@ class DataManager:
         if self.data is not None:
             self.data.bfill(inplace=True)
 
+    def fill_manual(self, column, index, value):
+        if self.data is not None:
+            if column in self.data.columns and index < len(self.data):
+                self.data.at[index, column] = value
+                print(self.data.at[index, column])
+
     def drop_missing_values(self):
         if self.data is not None:
             self.data.dropna(inplace=True)
