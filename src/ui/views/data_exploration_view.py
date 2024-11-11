@@ -1,6 +1,6 @@
 import customtkinter as ctk
-from tkinter import ttk
 import matplotlib.pyplot as plt
+from ..components.universal_table import UniversalTable
 
 class DataExplorationView(ctk.CTkScrollableFrame):
     def __init__(self, master, data_manager=None, navigation_bar=None, **kwargs):
@@ -12,25 +12,19 @@ class DataExplorationView(ctk.CTkScrollableFrame):
         self.info_section_label = ctk.CTkLabel(self, text="Dataset Information", font=("Arial", 16, "bold"))
         self.info_section_label.pack(pady=(10, 5))
 
-        self.info_table = ttk.Treeview(self, columns=("Property", "Value"), show="headings", height=4)
-        self.info_table.heading("Property", text="Property")
-        self.info_table.heading("Value", text="Value")
+        self.info_table = UniversalTable(self, data_list=[], empty_message="No dataset information available")
         self.info_table.pack(pady=5, fill="both", expand=True)
 
         self.columns_section_label = ctk.CTkLabel(self, text="All Columns", font=("Arial", 16, "bold"))
         self.columns_section_label.pack(pady=(20, 5))
 
-        self.columns_table = ttk.Treeview(self, columns=("Column", "Data Type"), show="headings", height=8)
-        self.columns_table.heading("Column", text="Column")
-        self.columns_table.heading("Data Type", text="Data Type")
+        self.columns_table = UniversalTable(self, data_list=[], empty_message="No columns available")
         self.columns_table.pack(pady=5, fill="both", expand=True)
 
         self.missing_label = ctk.CTkLabel(self, text="Missing Values", font=("Arial", 16, "bold"))
         self.missing_label.pack(pady=(10, 5))
-        
-        self.missing_table = ttk.Treeview(self, columns=("Column", "Missing Values"), show="headings", height=4)
-        self.missing_table.heading("Column", text="Column")
-        self.missing_table.heading("Missing Values", text="Missing Values")
+
+        self.missing_table = UniversalTable(self, data_list=[], empty_message="No missing values")
         self.missing_table.pack(pady=5, fill="both", expand=True)
 
         self.fill_buttons_frame = ctk.CTkFrame(self, fg_color="#2B2B2B")
@@ -44,14 +38,12 @@ class DataExplorationView(ctk.CTkScrollableFrame):
 
         self.text_stats_label = ctk.CTkLabel(self, text="Text Length Statistics", font=("Arial", 16, "bold"))
         self.text_stats_label.pack(pady=(20, 5))
-        
+
         self.column_var = ctk.StringVar()
         self.column_select = ctk.CTkOptionMenu(self, variable=self.column_var, values=[], command=self.on_column_selected)
         self.column_select.pack(pady=(10, 5), fill="x")
 
-        self.text_stats_table = ttk.Treeview(self, columns=("Statistic", "Value"), show="headings", height=4)
-        self.text_stats_table.heading("Statistic", text="Statistic")
-        self.text_stats_table.heading("Value", text="Value")
+        self.text_stats_table = UniversalTable(self, data_list=[], empty_message="No text statistics available")
         self.text_stats_table.pack(pady=5, fill="both", expand=True)
 
         self.show_plot_button = ctk.CTkButton(self, text="Show Text Length Distribution", command=self.show_text_length_distribution)
@@ -68,31 +60,31 @@ class DataExplorationView(ctk.CTkScrollableFrame):
         self.column_var.set(columns[0] if columns else "")
 
     def populate_columns_table(self):
-        self.columns_table.delete(*self.columns_table.get_children())
-        for col, dtype in self.data_manager.get_basic_info()["Data Types"].items():
-            self.columns_table.insert("", "end", values=(col, dtype))
+        column_data = [{"Column": col, "Data Type": str(dtype)} for col, dtype in self.data_manager.get_basic_info()["Data Types"].items()]
+        self.columns_table.display_data(column_data)
 
     def on_column_selected(self, selected_column):
         self.display_text_stats()
 
     def display_basic_info(self):
         info = self.data_manager.get_basic_info()
-        self.info_table.insert("", "end", values=("Number of records", info["Number of records"]))
-        self.info_table.insert("", "end", values=("Number of columns", info["Number of columns"]))
-        self.info_table.insert("", "end", values=("Columns", ", ".join(info["Columns"])))
-        self.info_table.insert("", "end", values=("Data Types", info["Data Types"]))
+        info_data = [
+            {"Property": "Number of records", "Value": info["Number of records"]},
+            {"Property": "Number of columns", "Value": info["Number of columns"]},
+            {"Property": "Columns", "Value": ", ".join(info["Columns"])},
+            {"Property": "Data Types", "Value": str(info["Data Types"])}
+        ]
+        self.info_table.display_data(info_data)
 
     def display_missing_values(self):
-        self.missing_table.delete(*self.missing_table.get_children())
         missing_values = self.data_manager.get_missing_values()
-        if any(value > 0 for value in missing_values.values()):
-            for col, count in missing_values.items():
-                if count > 0:
-                    self.missing_table.insert("", "end", values=(col, count))
+        missing_data = [{"Column": col, "Missing Values": count} for col, count in missing_values.items() if count > 0]
+        if missing_data:
+            self.missing_table.display_data(missing_data)
             self.fill_above_button.configure(state="normal")
             self.fill_below_button.configure(state="normal")
         else:
-            self.missing_table.insert("", "end", values=("No missing values", ""))
+            self.missing_table.display_data([{"Column": "No missing values", "Missing Values": ""}])
             self.fill_above_button.configure(state="disabled")
             self.fill_below_button.configure(state="disabled")
 
@@ -106,9 +98,8 @@ class DataExplorationView(ctk.CTkScrollableFrame):
 
     def display_text_stats(self):
         stats = self.data_manager.get_text_column_stats(self.column_var.get())
-        self.text_stats_table.delete(*self.text_stats_table.get_children())
-        for stat_name, value in stats.items():
-            self.text_stats_table.insert("", "end", values=(stat_name, value))
+        stats_data = [{"Statistic": stat, "Value": value} for stat, value in stats.items()]
+        self.text_stats_table.display_data(stats_data)
 
     def show_text_length_distribution(self):
         text_lengths = self.data_manager.get_data()[self.column_var.get()].str.len()
