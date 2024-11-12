@@ -93,3 +93,15 @@ class DataManager:
                 "Median Length": text_lengths.median()
             }
         return {}
+    
+    def normalize_case(self, column):
+        if self.data is not None and column in self.data.columns:
+            self.data[column] = self.data[column].str.lower()
+
+    def remove_special_chars(self, column):
+        if self.data is not None and column in self.data.columns:
+            self.data[column] = self.data[column].str.replace(r'[^a-zA-Z0-9\s]', '', regex=True)
+        
+    def remove_numbers(self, column):
+        if self.data is not None and column in self.data.columns:
+            self.data[column] = self.data[column].str.replace(r'\d+', '', regex=True)

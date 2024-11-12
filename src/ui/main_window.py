@@ -58,7 +58,7 @@ class MainWindow(ctk.CTkFrame):
         self.navigation_bar.update_title(self.steps[index][0])
         self.navigation_bar.set_back_enabled(index > 0)
 
-        if isinstance(self.current_frame, DataExplorationView):
+        if isinstance(self.current_frame, DataExplorationView) or isinstance(self.current_frame, DataCleaningView):
             self.navigation_bar.set_next_enabled(True)
         
         self.sidebar.highlight_step(index)
