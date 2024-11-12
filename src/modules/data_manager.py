@@ -42,6 +42,12 @@ class DataManager:
                 "Data Types": self.data.dtypes.to_dict()
             }
         return {}
+    
+    def are_all_columns_strings(self):
+        if self.data is not None and not self.data.empty:
+            return all(self.data.dtypes == 'string')
+        return False
+
 
     def get_missing_values(self):
         if self.data is not None:
@@ -120,3 +126,17 @@ class DataManager:
             if self.data[column].dtype == 'string':
                 self.data[column] = self.data[column].apply(lambda x: [token.text for token in nlp(x)] if pd.notnull(x) else x)
                 print(self.data[column])
+
+    def convert_non_string_columns_to_string(self):
+            if self.data is not None:
+                datetime_columns = self.data.select_dtypes(include=['datetime64[ns]', 'datetime64']).columns
+                for col in datetime_columns:
+                    has_time = self.data[col].dt.hour.any() or self.data[col].dt.minute.any() or self.data[col].dt.second.any()
+                    if has_time:
+                        format_str = '%Y-%m-%d %H:%M:%S'
+                    else:
+                        format_str = '%Y-%m-%d'
+                    self.data[col] = self.data[col].dt.strftime(format_str).astype('string')
+                non_string_columns = self.data.select_dtypes(exclude=['string']).columns
+                self.data[non_string_columns] = self.data[non_string_columns].astype('string')
+

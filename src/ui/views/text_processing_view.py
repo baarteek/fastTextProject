@@ -9,9 +9,6 @@ class TextProcessingView(ctk.CTkScrollableFrame):
         self.data_manager = data_manager
         self.navigation_bar = navigation_bar
 
-        self.text_processing_label = ctk.CTkLabel(self, text="Text Processing", font=("Arial", 16, "bold"))
-        self.text_processing_label.pack(pady=(10, 5))
-
         self.column_var = ctk.StringVar()
 
         self.column_select = ctk.CTkOptionMenu(self, variable=self.column_var, values=[])
@@ -104,7 +101,6 @@ class TextProcessingView(ctk.CTkScrollableFrame):
             self.processed_data_table.display_data([{"Message": "No data to display"}])
 
     def _get_columns_to_process(self, column):
-        """Helper method to determine which columns to process based on selection."""
         if column == "All Columns":
             return self.data_manager.get_data().select_dtypes(include='string').columns
         else:
