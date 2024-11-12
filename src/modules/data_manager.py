@@ -1,4 +1,7 @@
 import pandas as pd
+import spacy
+
+nlp = spacy.load("en_core_web_sm")
 
 class DataManager:
     def __init__(self):
@@ -98,10 +101,22 @@ class DataManager:
         if self.data is not None and column in self.data.columns:
             self.data[column] = self.data[column].str.lower()
 
+    def remove_excess_spaces(self, column):
+        if self.data is not None and column in self.data.columns and self.data[column].dtype == 'string':
+            self.data[column] = self.data[column].str.replace('\s{2,}', ' ', regex=True)
+
     def remove_special_chars(self, column):
         if self.data is not None and column in self.data.columns:
             self.data[column] = self.data[column].str.replace(r'[^a-zA-Z0-9\s]', '', regex=True)
+            self.remove_excess_spaces(column)
         
     def remove_numbers(self, column):
         if self.data is not None and column in self.data.columns:
             self.data[column] = self.data[column].str.replace(r'\d+', '', regex=True)
+            self.remove_excess_spaces(column)
+
+    def tokenize(self, column):
+        if self.data is not None and column in self.data.columns:
+            if self.data[column].dtype == 'string':
+                self.data[column] = self.data[column].apply(lambda x: [token.text for token in nlp(x)] if pd.notnull(x) else x)
+                print(self.data[column])

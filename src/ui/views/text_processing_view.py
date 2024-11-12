@@ -41,6 +41,9 @@ class TextProcessingView(ctk.CTkScrollableFrame):
         )
         self.remove_numbers_button.pack(side="left", padx=5, fill="x", expand=True)
 
+        self.tokenize_button = ctk.CTkButton(self, text="Tokenize Text", command=self.tokenize_text)
+        self.tokenize_button.pack(pady=5, fill="x", expand=True)
+
         self.processed_data_table = UniversalTable(self, data_list=[], empty_message="No processed data to display")
         self.processed_data_table.pack(pady=5, fill="both", expand=True)
 
@@ -48,34 +51,50 @@ class TextProcessingView(ctk.CTkScrollableFrame):
         self.display_processed_data()
 
     def populate_column_options(self):
-        columns = [col for col in self.data_manager.get_data().columns]
-        self.column_select.configure(values=columns)
-        if columns:
-            self.column_var.set(columns[0])
+        string_columns = [col for col in self.data_manager.get_data().select_dtypes(include='string').columns]
+        self.column_select.configure(values=["All Columns"] + string_columns)
+        if string_columns:
+            self.column_var.set("All Columns")
 
     def normalize_case(self):
         column = self.column_var.get()
-        if column:
-            progress_dialog = ProgressDialog(self, title="Normalizing Case", message="Normalizing text case...")
-            self.data_manager.normalize_case(column)
-            progress_dialog.stop_progress()
-            self.display_processed_data()
+        columns_to_process = self._get_columns_to_process(column)
+
+        progress_dialog = ProgressDialog(self, title="Normalizing Case", message="Normalizing text case...")
+        for col in columns_to_process:
+            self.data_manager.normalize_case(col)
+        progress_dialog.stop_progress()
+        self.display_processed_data()
 
     def remove_special_characters(self):
         column = self.column_var.get()
-        if column:
-            progress_dialog = ProgressDialog(self, title="Removing Special Characters", message="Removing special characters...")
-            self.data_manager.remove_special_chars(column)
-            progress_dialog.stop_progress()
-            self.display_processed_data()
+        columns_to_process = self._get_columns_to_process(column)
+
+        progress_dialog = ProgressDialog(self, title="Removing Special Characters", message="Removing special characters...")
+        for col in columns_to_process:
+            self.data_manager.remove_special_chars(col)
+        progress_dialog.stop_progress()
+        self.display_processed_data()
 
     def remove_numbers(self):
         column = self.column_var.get()
-        if column:
-            progress_dialog = ProgressDialog(self, title="Removing Numbers", message="Removing numbers from text...")
-            self.data_manager.remove_numbers(column)
-            progress_dialog.stop_progress()
-            self.display_processed_data()
+        columns_to_process = self._get_columns_to_process(column)
+
+        progress_dialog = ProgressDialog(self, title="Removing Numbers", message="Removing numbers from text...")
+        for col in columns_to_process:
+            self.data_manager.remove_numbers(col)
+        progress_dialog.stop_progress()
+        self.display_processed_data()
+
+    def tokenize_text(self):
+        column = self.column_var.get()
+        columns_to_process = self._get_columns_to_process(column)
+
+        progress_dialog = ProgressDialog(self, title="Tokenizing Text", message="Tokenizing text...")
+        for col in columns_to_process:
+            self.data_manager.tokenize(col)
+        progress_dialog.stop_progress()
+        self.display_processed_data()
 
     def display_processed_data(self):
         if self.data_manager.data is not None:
@@ -83,3 +102,10 @@ class TextProcessingView(ctk.CTkScrollableFrame):
             self.processed_data_table.display_data(processed_data)
         else:
             self.processed_data_table.display_data([{"Message": "No data to display"}])
+
+    def _get_columns_to_process(self, column):
+        """Helper method to determine which columns to process based on selection."""
+        if column == "All Columns":
+            return self.data_manager.get_data().select_dtypes(include='string').columns
+        else:
+            return [column]
