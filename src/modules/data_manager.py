@@ -91,6 +91,12 @@ class DataManager:
         if self.data is not None:
             self.data.drop_duplicates(inplace=True)
 
+    def remove_column(self, column):
+        if self.data is not None and column in self.data.columns:
+            self.data = self.data.drop(columns=[column])
+            return True
+        return False
+
     def get_text_column_stats(self, column):
         if self.data is not None and column in self.data.columns and self.data[column].dtype == 'string':
             text_lengths = self.data[column].str.len()
