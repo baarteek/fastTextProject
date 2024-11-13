@@ -8,6 +8,7 @@ class TextProcessingView(ctk.CTkScrollableFrame):
 
         self.data_manager = data_manager
         self.navigation_bar = navigation_bar
+        self.is_tokenized = False
 
         self.column_var = ctk.StringVar()
 
@@ -40,6 +41,11 @@ class TextProcessingView(ctk.CTkScrollableFrame):
 
         self.tokenize_button = ctk.CTkButton(self, text="Tokenize Text", command=self.tokenize_text)
         self.tokenize_button.pack(pady=5, fill="x", expand=True)
+
+        self.remove_stopwords_button = ctk.CTkButton(
+            self, text="Remove Stopwords", command=self.remove_stopwords, state="disabled"
+        )
+        self.remove_stopwords_button.pack(pady=5, fill="x", expand=True)
 
         self.processed_data_table = UniversalTable(self, data_list=[], empty_message="No processed data to display")
         self.processed_data_table.pack(pady=5, fill="both", expand=True)
@@ -91,7 +97,21 @@ class TextProcessingView(ctk.CTkScrollableFrame):
         for col in columns_to_process:
             self.data_manager.tokenize(col)
         progress_dialog.stop_progress()
+
+        self.is_tokenized = True
+        self.remove_stopwords_button.configure(state="normal")
         self.display_processed_data()
+
+    def remove_stopwords(self):
+        column = self.column_var.get()
+        columns_to_process = self._get_columns_to_process(column)
+
+        progress_dialog = ProgressDialog(self, title="Removing Stopwords", message="Removing stopwords...")
+        for col in columns_to_process:
+            self.data_manager.remove_stopwords(col)
+        progress_dialog.stop_progress()
+        self.display_processed_data()
+
 
     def display_processed_data(self):
         if self.data_manager.data is not None:
@@ -102,6 +122,8 @@ class TextProcessingView(ctk.CTkScrollableFrame):
 
     def _get_columns_to_process(self, column):
         if column == "All Columns":
-            return self.data_manager.get_data().select_dtypes(include='string').columns
+            return self.data_manager.get_data().columns
         else:
             return [column]
+
+

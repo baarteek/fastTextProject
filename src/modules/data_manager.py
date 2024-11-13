@@ -1,5 +1,6 @@
 import pandas as pd
 import spacy
+from spacy.lang.en.stop_words import STOP_WORDS
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -47,7 +48,6 @@ class DataManager:
         if self.data is not None and not self.data.empty:
             return all(self.data.dtypes == 'string')
         return False
-
 
     def get_missing_values(self):
         if self.data is not None:
@@ -98,7 +98,7 @@ class DataManager:
         return False
 
     def get_text_column_stats(self, column):
-        if self.data is not None and column in self.data.columns and self.data[column].dtype == 'string':
+        if self.data is not None and column in self.data.columns and pd.api.types.is_string_dtype(self.data[column]):
             text_lengths = self.data[column].str.len()
             return {
                 "Analyzed Column": column,
@@ -110,39 +110,49 @@ class DataManager:
         return {}
     
     def normalize_case(self, column):
-        if self.data is not None and column in self.data.columns:
+        if self.data is not None and column in self.data.columns and pd.api.types.is_string_dtype(self.data[column]):
             self.data[column] = self.data[column].str.lower()
 
     def remove_excess_spaces(self, column):
-        if self.data is not None and column in self.data.columns and self.data[column].dtype == 'string':
+        if self.data is not None and column in self.data.columns and pd.api.types.is_string_dtype(self.data[column]):
             self.data[column] = self.data[column].str.replace('\s{2,}', ' ', regex=True)
 
     def remove_special_chars(self, column):
-        if self.data is not None and column in self.data.columns:
+        if self.data is not None and column in self.data.columns and pd.api.types.is_string_dtype(self.data[column]):
             self.data[column] = self.data[column].str.replace(r'[^a-zA-Z0-9\s]', '', regex=True)
             self.remove_excess_spaces(column)
         
     def remove_numbers(self, column):
-        if self.data is not None and column in self.data.columns:
+        if self.data is not None and column in self.data.columns and pd.api.types.is_string_dtype(self.data[column]):
             self.data[column] = self.data[column].str.replace(r'\d+', '', regex=True)
             self.remove_excess_spaces(column)
 
+    def convert_non_string_columns_to_string(self):
+        if self.data is not None:
+            datetime_columns = self.data.select_dtypes(include=['datetime64[ns]', 'datetime64']).columns
+            for col in datetime_columns:
+                has_time = self.data[col].dt.hour.any() or self.data[col].dt.minute.any() or self.data[col].dt.second.any()
+                if has_time:
+                    format_str = '%Y-%m-%d %H:%M:%S'
+                else:
+                    format_str = '%Y-%m-%d'
+                self.data[col] = self.data[col].dt.strftime(format_str).astype('string')
+            non_string_columns = self.data.select_dtypes(exclude=['string']).columns
+            self.data[non_string_columns] = self.data[non_string_columns].astype('string')
+
     def tokenize(self, column):
         if self.data is not None and column in self.data.columns:
-            if self.data[column].dtype == 'string':
-                self.data[column] = self.data[column].apply(lambda x: [token.text for token in nlp(x)] if pd.notnull(x) else x)
-                print(self.data[column])
+            if pd.api.types.is_string_dtype(self.data[column]):
 
-    def convert_non_string_columns_to_string(self):
-            if self.data is not None:
-                datetime_columns = self.data.select_dtypes(include=['datetime64[ns]', 'datetime64']).columns
-                for col in datetime_columns:
-                    has_time = self.data[col].dt.hour.any() or self.data[col].dt.minute.any() or self.data[col].dt.second.any()
-                    if has_time:
-                        format_str = '%Y-%m-%d %H:%M:%S'
-                    else:
-                        format_str = '%Y-%m-%d'
-                    self.data[col] = self.data[col].dt.strftime(format_str).astype('string')
-                non_string_columns = self.data.select_dtypes(exclude=['string']).columns
-                self.data[non_string_columns] = self.data[non_string_columns].astype('string')
+                self.data[column] = self.data[column].apply(
+                    lambda x: [token.text for token in nlp(x)] if pd.notnull(x) else x
+                ).astype('object')
+
+
+    def remove_stopwords(self, column):
+        if self.data is not None and column in self.data.columns:
+            stopwords = STOP_WORDS
+            self.data[column] = self.data[column].apply(
+                lambda tokens: [token for token in tokens if token.lower() not in stopwords] if isinstance(tokens, list) else tokens
+            )
 
