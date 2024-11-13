@@ -17,9 +17,7 @@ class MainWindow(ctk.CTkFrame):
             ("Data Cleaning", DataCleaningView),
             ("Text Processing", TextProcessingView),
             ("Label Preparation", LabelPreparationView),
-            ("Data Splitting", DataSplittingView),
-            ("FastText Formatting", FastTextFormattingView),
-            ("Data Validation", DataValidationView)
+            ("Data Splitting", DataSplittingView)
         ]
         self.current_index = 0
         self.view_instances = {} 
@@ -58,7 +56,7 @@ class MainWindow(ctk.CTkFrame):
         self.navigation_bar.update_title(self.steps[index][0])
         self.navigation_bar.set_back_enabled(index > 0)
 
-        if isinstance(self.current_frame, DataCleaningView):
+        if isinstance(self.current_frame, DataCleaningView) or isinstance(self.current_frame, TextProcessingView) or isinstance(self.current_frame, LabelPreparationView):
             self.navigation_bar.set_next_enabled(True)
         
         self.sidebar.highlight_step(index)

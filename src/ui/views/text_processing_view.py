@@ -47,13 +47,12 @@ class TextProcessingView(ctk.CTkScrollableFrame):
 
         self.remove_stopwords_button = ctk.CTkButton(
             self.process_buttons_frame, text="Remove Stopwords", command=self.remove_stopwords,
-            fg_color="#c24c4c", hover_color="#9c3636", state="disabled"
+            fg_color="#c24c4c", hover_color="#9c3636"
         )
         self.remove_stopwords_button.pack(side="left", padx=5, fill="x", expand=True)
 
         self.lemmatize_button = ctk.CTkButton(
-            self.process_buttons_frame, text="Lemmatize Text", command=self.lemmatize_text,
-            state="disabled"
+            self.process_buttons_frame, text="Lemmatize Text", command=self.lemmatize_text
         )
         self.lemmatize_button.pack(side="left", padx=5, fill="x", expand=True)
 
@@ -105,16 +104,7 @@ class TextProcessingView(ctk.CTkScrollableFrame):
         progress_dialog.stop_progress()
 
         self.is_tokenized = True
-        self.remove_stopwords_button.configure(state="normal")
-        self.lemmatize_button.configure(state="normal")
-        self.disable_initial_buttons()
         self.display_processed_data()
-        self.navigation_bar.set_next_enabled(True) 
-
-    def disable_initial_buttons(self):
-        self.normalize_case_button.configure(state="disabled")
-        self.remove_special_chars_button.configure(state="disabled")
-        self.remove_numbers_button.configure(state="disabled")
 
     def remove_stopwords(self):
         column = self.column_var.get()

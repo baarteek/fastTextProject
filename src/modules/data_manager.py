@@ -7,6 +7,8 @@ nlp = spacy.load("en_core_web_sm")
 class DataManager:
     def __init__(self):
         self.data = None
+        self.train_data = None
+        self.test_data = None
 
     def load_data(self, file_path):
         try:
@@ -166,5 +168,21 @@ class DataManager:
             self.data[column] = self.data[column].apply(
                 lambda x: f"__label__{x}" if x is not None and not str(x).startswith("__label__") else x
             )
+
+    def split_data(self, split_ratio):
+        train_data = self.data.sample(frac=split_ratio, random_state=1)
+        test_data = self.data.drop(train_data.index)
+        self.train_data = train_data
+        self.test_data = test_data
+
+    def get_train_data(self):
+        return self.train_data
+
+    def get_test_data(self):
+        return self.test_data
+
+    def save_splits(self, train_file_path, test_file_path):
+        self.train_data.to_csv(train_file_path, index=False)
+        self.test_data.to_csv(test_file_path, index=False)
 
 
