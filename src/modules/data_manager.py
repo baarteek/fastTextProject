@@ -148,11 +148,16 @@ class DataManager:
                     lambda x: [token.text for token in nlp(x)] if pd.notnull(x) else x
                 ).astype('object')
 
-
     def remove_stopwords(self, column):
         if self.data is not None and column in self.data.columns:
             stopwords = STOP_WORDS
             self.data[column] = self.data[column].apply(
                 lambda tokens: [token for token in tokens if token.lower() not in stopwords] if isinstance(tokens, list) else tokens
             )
+    
+    def lemmatize_column(self, column):
+        if self.data is not None and column in self.data.columns:
+            self.data[column] = self.data[column].apply(
+                    lambda tokens: [nlp(token)[0].lemma_ for token in tokens] if tokens else tokens
+                )
 
