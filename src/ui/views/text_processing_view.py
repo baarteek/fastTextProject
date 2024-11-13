@@ -109,6 +109,7 @@ class TextProcessingView(ctk.CTkScrollableFrame):
         self.lemmatize_button.configure(state="normal")
         self.disable_initial_buttons()
         self.display_processed_data()
+        self.navigation_bar.set_next_enabled(True) 
 
     def disable_initial_buttons(self):
         self.normalize_case_button.configure(state="disabled")

@@ -161,3 +161,10 @@ class DataManager:
                     lambda tokens: [nlp(token)[0].lemma_ for token in tokens] if tokens else tokens
                 )
 
+    def add_fasttext_prefix(self, column):
+        if self.data is not None and column in self.data.columns:
+            self.data[column] = self.data[column].apply(
+                lambda x: f"__label__{x}" if x is not None and not str(x).startswith("__label__") else x
+            )
+
+
