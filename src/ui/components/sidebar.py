@@ -32,13 +32,11 @@ class Sidebar(ctk.CTkFrame):
 
             self.button_state = "go_to_prepare"
             self.dynamic_btn.configure(text="Go to Prepare Data")
-            self.info_label.configure(text="If you need to prepare data, click the button below:")
         else:
             prepare_data_index = self.steps.index("Data Loading")
             self.callback(prepare_data_index)
             self.button_state = "go_to_training"
             self.dynamic_btn.configure(text="Go to Model Training")
-            self.info_label.configure(text="If your data is ready, click the button below:")
 
     def highlight_step(self, index):
         for i, lbl in enumerate(self.labels):

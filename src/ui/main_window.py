@@ -33,7 +33,8 @@ class MainWindow(ctk.CTkFrame):
         self.container = ctk.CTkFrame(self)
         self.container.place(relx=0.2, rely=0, relwidth=0.8, relheight=1.0)
 
-        self.navigation_bar = NavigationBar(self.container, title=self.steps[self.current_index][0], on_back=self.go_back, on_next=self.go_next)
+        self.navigation_bar = NavigationBar(self.container, title=self.steps[self.current_index][0], on_back=self.go_back, on_next=self.go_next
+)
         self.navigation_bar.place(relx=0, rely=0, relwidth=1.0, relheight=0.1)
         self.navigation_bar.set_next_enabled(False)
 
