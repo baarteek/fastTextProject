@@ -4,6 +4,7 @@ from .components.navigation_bar import NavigationBar
 from .views import *
 from modules.data_manager import DataManager
 
+
 class MainWindow(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
@@ -17,22 +18,22 @@ class MainWindow(ctk.CTkFrame):
             ("Data Cleaning", DataCleaningView),
             ("Text Processing", TextProcessingView),
             ("Label Preparation", LabelPreparationView),
-            ("Data Splitting", DataSplittingView)
+            ("Data Splitting", DataSplittingView),
+            ("Model Training", ModelTrainingView),
+            ("Model Validation", ModelValidationView),
+            ("Model Export", ModelExportView)
         ]
         self.current_index = 0
-        self.view_instances = {} 
+        self.view_instances = {}
 
         self.sidebar = Sidebar(self, self.switch_frame, steps=[step[0] for step in self.steps])
         self.sidebar.place(relx=0, rely=0, relwidth=0.2, relheight=1.0)
+
+
         self.container = ctk.CTkFrame(self)
         self.container.place(relx=0.2, rely=0, relwidth=0.8, relheight=1.0)
-        
-        self.navigation_bar = NavigationBar(
-            self.container, 
-            title=self.steps[self.current_index][0], 
-            on_back=self.go_back, 
-            on_next=self.go_next
-        )
+
+        self.navigation_bar = NavigationBar(self.container, title=self.steps[self.current_index][0], on_back=self.go_back, on_next=self.go_next)
         self.navigation_bar.place(relx=0, rely=0, relwidth=1.0, relheight=0.1)
         self.navigation_bar.set_next_enabled(False)
 
@@ -47,7 +48,11 @@ class MainWindow(ctk.CTkFrame):
         view_class = self.steps[index][1]
 
         if index not in self.view_instances:
-            self.view_instances[index] = view_class(self.container, data_manager=self.data_manager, navigation_bar=self.navigation_bar)
+            self.view_instances[index] = view_class(
+                self.container,
+                data_manager=self.data_manager,
+                navigation_bar=self.navigation_bar
+            )
             self.navigation_bar.set_next_enabled(False)
 
         self.current_frame = self.view_instances[index]
@@ -56,9 +61,9 @@ class MainWindow(ctk.CTkFrame):
         self.navigation_bar.update_title(self.steps[index][0])
         self.navigation_bar.set_back_enabled(index > 0)
 
-        if isinstance(self.current_frame, DataCleaningView) or isinstance(self.current_frame, TextProcessingView) or isinstance(self.current_frame, LabelPreparationView):
+        if isinstance(self.current_frame, (DataCleaningView, TextProcessingView, LabelPreparationView)):
             self.navigation_bar.set_next_enabled(True)
-        
+
         self.sidebar.highlight_step(index)
 
     def go_back(self):
