@@ -19,21 +19,17 @@ class ModelConfigurationView(ctk.CTkFrame):
             "Dimension": ("100", "Size of word vectors", "int"),
             "Word N-Grams": ("2", "Max n-grams length", "int"),
             "Loss Function": ("softmax", "Type of loss function", None),
-            "Min Word Count": ("5", "Minimum word occurrences", "int"),
-            "Bucket Size": ("2000000", "Number of hash buckets", "int"),
-            "Subword Min Length": ("3", "Min subword length", "int"),
-            "Subword Max Length": ("6", "Max subword length", "int")
         }
 
         self.loss_options = ["softmax", "ns", "hs"]
-        
+        self.parameters_added = False
+        self.save_button = None 
+
         self.create_ui()
 
     def create_ui(self):
-        title_label = ctk.CTkLabel(
-            self, text="Model Training Configuration", 
-            font=("Arial", 16, "bold"), text_color="white"
-        )
+        title_label = ctk.CTkLabel(self, text="Model Training Configuration", 
+                                  font=("Arial", 16, "bold"), text_color="white")
         title_label.pack(pady=(20, 10))
         
         self.create_file_selection_section()
@@ -67,6 +63,9 @@ class ModelConfigurationView(ctk.CTkFrame):
         self.confirm_button.pack(pady=(10, 20))
 
     def setup_parameter_table(self):
+        if self.parameters_added:
+            return
+
         header_frame = ctk.CTkFrame(self.param_section, fg_color="#333333", corner_radius=8)
         header_frame.pack(fill="x", padx=10, pady=10)
 
@@ -89,7 +88,7 @@ class ModelConfigurationView(ctk.CTkFrame):
                 widget = ctk.CTkEntry(self.table_frame)
                 widget.insert(0, default)
 
-            widget.configure(state="disabled")
+            widget.configure(state="normal")
             widget.grid(row=row, column=1, padx=10, pady=5, sticky="we")
 
             desc_label = ctk.CTkLabel(self.table_frame, text=desc, text_color="grey", font=("Arial", 10))
@@ -100,35 +99,10 @@ class ModelConfigurationView(ctk.CTkFrame):
 
         self.table_frame.grid_columnconfigure(1, weight=1)
 
-    def add_parameters_section(self):
-        ctk.CTkLabel(
-            self.param_section, 
-            text="Model Parameters", 
-            font=("Arial", 14, "bold"), 
-            text_color="white"
-        ).pack(pady=(10, 0))
-        
-        self.setup_parameter_table()
+        self.save_button = ctk.CTkButton(self.param_section, text="Save Parameters", fg_color="#4CAF50", command=self.save_parameters)
+        self.save_button.pack(pady=(20, 10))
 
-        self.save_params_button = ctk.CTkButton(
-            self.param_section, 
-            text="Save Parameters", 
-            fg_color="#4CAF50", 
-            command=self.save_parameters
-        )
-        self.save_params_button.pack(pady=(20, 10))
-
-    def select_train_data(self):
-        file_path = filedialog.askopenfilename(title="Select Training Data File", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
-        if file_path:
-            self.train_data_path = file_path
-            self.train_path_label.configure(text=file_path, text_color="green")
-
-    def select_test_data(self):
-        file_path = filedialog.askopenfilename(title="Select Testing Data File", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
-        if file_path:
-            self.test_data_path = file_path
-            self.test_path_label.configure(text=file_path, text_color="green")
+        self.parameters_added = True
 
     def confirm_paths(self):
         if self.train_data_path and self.test_data_path:
@@ -136,16 +110,9 @@ class ModelConfigurationView(ctk.CTkFrame):
             self.fasttext_manager.set_test_file(self.test_data_path)
             self.status_label.configure(text="Paths confirmed successfully!", text_color="green")
             self.param_section.pack(fill="both", expand=True, padx=20, pady=(10, 20))
-            self.add_parameters_section()
-            self.enable_parameters()
-            if self.navigation_bar:
-                self.navigation_bar.set_next_enabled(True) 
+            self.setup_parameter_table()
         else:
             self.status_label.configure(text="Please select both training and testing data files.", text_color="red")
-
-    def enable_parameters(self):
-        for widget, _ in self.param_entries.values():
-            widget.configure(state="normal")
 
     def save_parameters(self):
         params = {}
@@ -164,3 +131,16 @@ class ModelConfigurationView(ctk.CTkFrame):
         
         self.fasttext_manager.set_params(params)
         self.status_label.configure(text="Parameters saved successfully!", text_color="green")
+        self.navigation_bar.set_next_enabled(True)
+
+    def select_train_data(self):
+        file_path = filedialog.askopenfilename(title="Select Training Data File", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        if file_path:
+            self.train_data_path = file_path
+            self.train_path_label.configure(text=file_path, text_color="green")
+
+    def select_test_data(self):
+        file_path = filedialog.askopenfilename(title="Select Testing Data File", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        if file_path:
+            self.test_data_path = file_path
+            self.test_path_label.configure(text=file_path, text_color="green")

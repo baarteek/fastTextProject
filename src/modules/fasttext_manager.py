@@ -80,25 +80,21 @@ class FastTextManager:
 
         try:
             result = self.model.test(self.test_file)
-            number_of_examples = result[0] if len(result) > 0 else None
-            precision = result[1] if len(result) > 1 else None
-            recall = result[2] if len(result) > 2 else None
+            number_of_examples = result[0]
+            accuracy = result[1]
 
             print("Model evaluation results:")
             print(f"Number of examples: {number_of_examples}")
-            if precision is not None:
-                print(f"Precision: {precision}")
-            if recall is not None:
-                print(f"Recall: {recall}")
+            print(f"Accuracy: {accuracy:.4f}")
 
             return {
                 "Number of examples": number_of_examples,
-                "Precision": precision,
-                "Recall": recall
+                "Accuracy": accuracy
             }
         except Exception as e:
             print(f"Error evaluating model: {e}")
             return None
+
 
     def predict(self, text):
         if self.model is None:
