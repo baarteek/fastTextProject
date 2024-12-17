@@ -8,6 +8,7 @@ class DataSplittingView(ctk.CTkScrollableFrame):
         super().__init__(master, fg_color="#1E1E1E", **kwargs)
 
         self.data_manager = data_manager
+        self.navigation_bar = navigation_bar
 
         self.split_frame = ctk.CTkFrame(self, fg_color="#1E1E1E")
         self.split_frame.pack(pady=(10, 5), fill="x", expand=True)
@@ -82,8 +83,9 @@ class DataSplittingView(ctk.CTkScrollableFrame):
         self.test_data_table.display_data(test_sample)
 
     def save_splits(self):
-        train_file_path = filedialog.asksaveasfilename(defaultextension=".csv", title="Save Training Data")
-        test_file_path = filedialog.asksaveasfilename(defaultextension=".csv", title="Save Testing Data")
+        train_file_path = filedialog.asksaveasfilename(defaultextension=".txt", title="Save Training Data")
+        test_file_path = filedialog.asksaveasfilename(defaultextension=".txt", title="Save Testing Data")
+        self.navigation_bar.set_next_enabled(True) 
         
         if train_file_path and test_file_path:
             progress_dialog = ProgressDialog(self, title="Saving Splits", message="Saving training and testing data to files...")

@@ -27,7 +27,7 @@ class Sidebar(ctk.CTkFrame):
 
     def toggle_button_action(self):
         if self.button_state == "go_to_training":
-            model_training_index = self.steps.index("Model Training")
+            model_training_index = self.steps.index("Model Configuration")
             self.callback(model_training_index)
 
             self.button_state = "go_to_prepare"
