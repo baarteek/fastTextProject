@@ -103,3 +103,13 @@ class FastTextManager:
             print("No model found. Please train the model before predicting.")
             return None
         return self.model.predict(text)
+
+
+    def save_model(self, file_path):
+        if self.model is None:
+            raise ValueError("No model to save. Please train the model first.")
+        try:
+            self.model.save_model(file_path)
+            print(f"Model saved to {file_path}")
+        except Exception as e:
+            raise ValueError(f"Error saving model: {e}")

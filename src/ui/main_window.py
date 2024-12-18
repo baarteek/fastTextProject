@@ -23,7 +23,6 @@ class MainWindow(ctk.CTkFrame):
             ("Data Splitting", DataSplittingView),
             ("Model Configuration", ModelConfigurationView),
             ("Model Training", ModelTrainingView),
-            ("Model Validation", ModelValidationView),
             ("Model Export", ModelExportView)
         ]
         self.current_index = 0
@@ -54,7 +53,7 @@ class MainWindow(ctk.CTkFrame):
         self.current_index = index
         view_class = self.steps[index][1]
 
-        if view_class in [ModelConfigurationView, ModelTrainingView, ModelValidationView, ModelExportView]:
+        if view_class in [ModelConfigurationView, ModelTrainingView, ModelExportView]:
             manager = self.fasttext_manager
             manager_arg_name = "fasttext_manager"
         else:

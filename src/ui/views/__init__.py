@@ -6,5 +6,4 @@ from .label_preparation_view import LabelPreparationView
 from .data_splitting_view import DataSplittingView
 from .model_configuration_view import ModelConfigurationView
 from .model_training_view import ModelTrainingView
-from .model_validation_view import ModelValidationView
 from .model_export_view import ModelExportView
