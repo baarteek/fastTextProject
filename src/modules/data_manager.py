@@ -147,7 +147,6 @@ class DataManager:
     def tokenize(self, column):
         if self.data is not None and column in self.data.columns:
             if pd.api.types.is_string_dtype(self.data[column]):
-
                 self.data[column] = self.data[column].apply(
                     lambda x: [token.text for token in nlp(x)] if pd.notnull(x) else x
                 ).astype('object')
@@ -196,7 +195,6 @@ class DataManager:
         return self.test_data
     
     def convert_tokenized_to_string(self, column):
-
         if self.data is not None and column in self.data.columns:
             try:
                 self.data[column] = self.data[column].apply(

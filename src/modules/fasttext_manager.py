@@ -82,6 +82,7 @@ class FastTextManager:
             result = self.model.test(self.test_file)
             number_of_examples = result[0]
             accuracy = result[1]
+            recall = result[2]
 
             print("Model evaluation results:")
             print(f"Number of examples: {number_of_examples}")
@@ -89,7 +90,8 @@ class FastTextManager:
 
             return {
                 "Number of examples": number_of_examples,
-                "Accuracy": accuracy
+                "Accuracy": accuracy,
+                "Recall": recall
             }
         except Exception as e:
             print(f"Error evaluating model: {e}")
