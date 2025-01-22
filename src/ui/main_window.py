@@ -43,6 +43,11 @@ class MainWindow(ctk.CTkFrame):
         self.navigation_bar.place(relx=0, rely=0, relwidth=1.0, relheight=0.1)
         self.navigation_bar.set_next_enabled(False)
 
+        self.load_model_button = ctk.CTkButton(
+            self, text="Load Model", fg_color="#4CAF50", command=self.open_load_model_view
+        )
+        self.load_model_button.place(relx=0.01, rely=0.8, relwidth=0.18, relheight=0.04)
+
         self.current_frame = None
         self.switch_frame(self.current_index)
 
@@ -88,3 +93,15 @@ class MainWindow(ctk.CTkFrame):
     def go_next(self):
         if self.current_index < len(self.steps) - 1:
             self.switch_frame(self.current_index + 1)
+
+    def open_load_model_view(self):
+        load_model_view = LoadModelView(
+            master=self.container,
+            fasttext_manager=self.fasttext_manager
+        )
+        if self.current_frame is not None:
+            self.current_frame.place_forget()
+
+        self.current_frame = load_model_view
+        self.current_frame.place(relx=0, rely=0.1, relwidth=1.0, relheight=0.9)
+        self.navigation_bar.update_title("Load Pretrained Model")

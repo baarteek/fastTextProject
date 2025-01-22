@@ -18,7 +18,8 @@ class ModelTrainingView(ctk.CTkScrollableFrame):
         self.current_epoch = 0
         self.total_epochs = self.fasttext_manager.params.get("epoch", 5)
 
-        self.epoch_accuracies = []
+        self.epoch_accuracies_train = []
+        self.epoch_accuracies_test = []
 
         self.create_ui()
 
@@ -48,14 +49,21 @@ class ModelTrainingView(ctk.CTkScrollableFrame):
         self.log_textbox = ctk.CTkTextbox(self, height=200, wrap="word", font=("Arial", 12), text_color="white")
         self.log_textbox.pack(fill="both", padx=20, pady=(0, 10))
 
-        plot_label = ctk.CTkLabel(self, text="Training Accuracy Plot", font=("Arial", 14, "bold"), text_color="white")
+        plot_label = ctk.CTkLabel(self, text="Accuracy Plots", font=("Arial", 14, "bold"), text_color="white")
         plot_label.pack(pady=(10, 5))
 
-        self.figure, self.ax = plt.subplots(figsize=(6, 4))
-        self.ax.set_title("Training Accuracy by Epoch")
-        self.ax.set_xlabel("Epoch")
-        self.ax.set_ylabel("Accuracy")
-        self.ax.grid(True)
+        self.figure, (self.ax_train, self.ax_test) = plt.subplots(1, 2, figsize=(12, 4))
+        self.ax_train.set_title("Training Accuracy by Epoch")
+        self.ax_train.set_xlabel("Epoch")
+        self.ax_train.set_ylabel("Accuracy")
+        self.ax_train.set_ylim(0, 1)
+        self.ax_train.grid(True)
+
+        self.ax_test.set_title("Test Accuracy by Epoch")
+        self.ax_test.set_xlabel("Epoch")
+        self.ax_test.set_ylabel("Accuracy")
+        self.ax_test.set_ylim(0, 1)
+        self.ax_test.grid(True)
 
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas_widget = self.canvas.get_tk_widget()
@@ -87,7 +95,8 @@ class ModelTrainingView(ctk.CTkScrollableFrame):
         self.total_epochs = self.fasttext_manager.params.get("epoch", 5)
         self.epoch_label.configure(text=f"Epoch: 0 / {self.total_epochs}")
         self.log_textbox.delete("1.0", "end")
-        self.epoch_accuracies.clear()
+        self.epoch_accuracies_train.clear()
+        self.epoch_accuracies_test.clear()
 
         self.training_thread = threading.Thread(target=self.run_training)
         self.training_thread.start()
@@ -118,44 +127,62 @@ class ModelTrainingView(ctk.CTkScrollableFrame):
             progress = epoch / self.total_epochs
             self.log_message(f"Epoch {epoch} completed in {epoch_time:.2f} seconds.")
 
-            results = self.fasttext_manager.evaluate_model()
-            accuracy = results.get("Accuracy", 0)
-            self.epoch_accuracies.append(accuracy)
-            self.log_message(f"Accuracy after Epoch {epoch}: {accuracy:.4f}")
+            train_results = self.fasttext_manager.evaluate_model(training=True)
+            test_results = self.fasttext_manager.evaluate_model(training=False)
+
+            train_accuracy = train_results.get("Accuracy", 0)
+            test_accuracy = test_results.get("Accuracy", 0)
+
+            self.epoch_accuracies_train.append(train_accuracy)
+            self.epoch_accuracies_test.append(test_accuracy)
+
+            self.log_message(f"Training Accuracy after Epoch {epoch}: {train_accuracy:.4f}")
+            self.log_message(f"Test Accuracy after Epoch {epoch}: {test_accuracy:.4f}")
 
             self.after(0, lambda e=epoch, p=progress, t=epoch_time: self.update_progress(e, p, t))
-            self.after(0, self.update_plot)
+            self.after(0, self.update_plots)
 
         end_time_total = time.time()
         total_training_time = end_time_total - start_time_total
 
-        final_results = self.fasttext_manager.evaluate_model()
+        final_test_results = self.fasttext_manager.evaluate_model(training=False)
         if self.stop_training:
             self.log_message(f"Training stopped. Displaying results for completed epochs...")
         else:
             self.log_message(f"Total training time: {total_training_time:.2f} seconds.")
             self.log_message("Evaluation completed. Displaying results...")
 
-        self.after(0, lambda: self.show_results(final_results, total_training_time))
+        self.after(0, lambda: self.show_results(final_test_results, total_training_time))
         self.after(0, self.training_finished)
 
     def training_finished(self):
         self.stop_button.configure(state="disabled")
         self.start_button.configure(state="normal")
         self.info_label.configure(text="Training stopped or completed.", text_color="green")
+        self.navigation_bar.set_next_enabled(True)
 
     def update_progress(self, epoch, progress, epoch_time):
         self.progress_bar.set(progress)
         self.epoch_label.configure(text=f"Epoch: {epoch} / {self.total_epochs} - Time: {epoch_time:.2f} sec")
         self.info_label.configure(text=f"Epoch {epoch} completed in {epoch_time:.2f} seconds", text_color="yellow")
 
-    def update_plot(self):
-        self.ax.clear()
-        self.ax.set_title("Training Accuracy by Epoch")
-        self.ax.set_xlabel("Epoch")
-        self.ax.set_ylabel("Accuracy")
-        self.ax.grid(True)
-        self.ax.plot(range(1, len(self.epoch_accuracies) + 1), self.epoch_accuracies, marker="o", linestyle="-", color="b")
+    def update_plots(self):
+        self.ax_train.clear()
+        self.ax_train.set_title("Training Accuracy by Epoch")
+        self.ax_train.set_xlabel("Epoch")
+        self.ax_train.set_ylabel("Accuracy")
+        self.ax_train.set_ylim(0, 1)
+        self.ax_train.grid(True)
+        self.ax_train.plot(range(1, len(self.epoch_accuracies_train) + 1), self.epoch_accuracies_train, marker="o", linestyle="-", color="b")
+
+        self.ax_test.clear()
+        self.ax_test.set_title("Test Accuracy by Epoch")
+        self.ax_test.set_xlabel("Epoch")
+        self.ax_test.set_ylabel("Accuracy")
+        self.ax_test.set_ylim(0, 1)
+        self.ax_test.grid(True)
+        self.ax_test.plot(range(1, len(self.epoch_accuracies_test) + 1), self.epoch_accuracies_test, marker="o", linestyle="-", color="r")
+
         self.canvas.draw()
 
     def show_results(self, results, total_time):
@@ -176,7 +203,6 @@ class ModelTrainingView(ctk.CTkScrollableFrame):
             self.results_table.destroy()
         self.results_table = UniversalTable(self.table_container, data_list=data_list)
         self.results_table.pack(fill="both", expand=True, padx=10, pady=10)
-        self.navigation_bar.set_next_enabled(True)
 
     def training_failed(self):
         self.log_message("Training failed. Check logs for details.")

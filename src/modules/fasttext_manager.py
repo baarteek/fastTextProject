@@ -70,21 +70,23 @@ class FastTextManager:
             print(f"Error training model: {e}")
             return False
 
-    def evaluate_model(self):
+    def evaluate_model(self, training=False):
         if self.model is None:
             print("No model found. Please train the model before evaluating.")
             return None
-        if self.test_file is None:
-            print("Test file not set. Please provide a test file path.")
+
+        file_path = self.train_file if training else self.test_file
+        if file_path is None:
+            print(f"{'Training' if training else 'Test'} file not set. Please provide a file path.")
             return None
 
         try:
-            result = self.model.test(self.test_file)
+            result = self.model.test(file_path)
             number_of_examples = result[0]
             accuracy = result[1]
             recall = result[2]
 
-            print("Model evaluation results:")
+            print(f"{'Training' if training else 'Test'} evaluation results:")
             print(f"Number of examples: {number_of_examples}")
             print(f"Accuracy: {accuracy:.4f}")
 
@@ -97,13 +99,11 @@ class FastTextManager:
             print(f"Error evaluating model: {e}")
             return None
 
-
     def predict(self, text):
         if self.model is None:
             print("No model found. Please train the model before predicting.")
             return None
         return self.model.predict(text)
-
 
     def save_model(self, file_path):
         if self.model is None:
@@ -113,3 +113,13 @@ class FastTextManager:
             print(f"Model saved to {file_path}")
         except Exception as e:
             raise ValueError(f"Error saving model: {e}")
+        
+    def load_model(self, file_path):
+        if not file_path:
+            raise ValueError("No file path provided for loading the model.")
+        try:
+            self.model = fasttext.load_model(file_path)
+            print(f"Model loaded successfully from {file_path}")
+        except Exception as e:
+            raise ValueError(f"Error loading model: {e}")
+
