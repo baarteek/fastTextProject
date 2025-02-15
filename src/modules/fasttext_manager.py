@@ -11,7 +11,8 @@ class FastTextManager:
             "epoch": 5,
             "wordNgrams": 1,
             "dim": 100,
-            "loss": "softmax"
+            "loss": "softmax",
+            "minCount": 1
         }
 
         self.param_key_map = {
@@ -19,7 +20,8 @@ class FastTextManager:
             "Learning Rate": "lr",
             "Dimension": "dim",
             "Word N-Grams": "wordNgrams",
-            "Loss Function": "loss"
+            "Loss Function": "loss",
+            "Min Count": "minCount"
         }
 
     def set_train_file(self, train_file_path):
@@ -37,14 +39,14 @@ class FastTextManager:
 
             if internal_key in ["lr"]:
                 self.params[internal_key] = float(value)
-            elif internal_key in ["epoch", "wordNgrams", "dim"]:
+            elif internal_key in ["epoch", "wordNgrams", "dim", "minCount"]:
                 self.params[internal_key] = int(value)
             else:
                 self.params[internal_key] = value
 
         print("Parameters saved:", self.params)
 
-    def train_model(self, lr=None, epoch=None, wordNgrams=None, dim=None, loss=None):
+    def train_model(self, lr=None, epoch=None, wordNgrams=None, dim=None, loss=None, minCount=None):
         if self.train_file is None:
             print("Train file not set. Please provide a train file path.")
             return False
@@ -54,6 +56,7 @@ class FastTextManager:
         wordNgrams = wordNgrams if wordNgrams is not None else self.params["wordNgrams"]
         dim = dim if dim is not None else self.params["dim"]
         loss = loss if loss is not None else self.params["loss"]
+        minCount = minCount if minCount is not None else self.params["minCount"]
 
         try:
             self.model = fasttext.train_supervised(
@@ -62,7 +65,8 @@ class FastTextManager:
                 epoch=epoch,
                 wordNgrams=wordNgrams,
                 dim=dim,
-                loss=loss
+                loss=loss,
+                minCount=minCount
             )
             print("Model trained successfully.")
             return True
@@ -122,4 +126,3 @@ class FastTextManager:
             print(f"Model loaded successfully from {file_path}")
         except Exception as e:
             raise ValueError(f"Error loading model: {e}")
-

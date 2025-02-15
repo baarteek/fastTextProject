@@ -19,9 +19,10 @@ class ModelConfigurationView(ctk.CTkFrame):
             "Dimension": ("100", "Size of word vectors", "int"),
             "Word N-Grams": ("2", "Max n-grams length", "int"),
             "Loss Function": ("softmax", "Type of loss function", None),
+            "Min Count": ("1", "Minimum count of word occurrences", "int")
         }
 
-        self.loss_options = ["softmax", "ns", "hs"]
+        self.loss_options = ["softmax", "ova"]
         self.parameters_added = False
         self.save_button = None 
 
