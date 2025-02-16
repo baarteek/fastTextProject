@@ -83,7 +83,7 @@ pip install -r requirements.txt
 1. **Clone the repository:**
 
    ```bash
-   git clone <repository>
+   git clone https://github.com/baarteek/fastTextProject
    cd fastTextProject
    ```
 
